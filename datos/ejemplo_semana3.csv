@@ -1,0 +1,9 @@
+id_participante,meses_desempleo,asistencia_sem1,asistencia_sem2,asistencia_sem3,puntuacion_modulo1,empleado_al_ingreso,barrera_transporte,barrera_cuido,ingreso_bajo,programa,area_adiestramiento,escolaridad
+N001,0,0.89,0.88,0.75,73.0,1,0,1,0,jovenes,Hospitalidad,algo_universidad
+N002,8,0.75,0.46,0.61,58.0,0,1,1,0,adultos,Salud,cuarto_ano
+N003,40,0.84,0.77,0.8,86.0,0,0,0,0,jovenes,Salud,cuarto_ano
+N004,0,0.81,0.7,0.6,81.0,1,0,1,1,jovenes,Hospitalidad,algo_universidad
+N005,11,1.0,0.82,0.86,67.0,0,0,0,0,adultos,Manufactura,cuarto_ano
+N006,0,1.0,0.98,0.88,89.0,0,0,1,1,jovenes,Manufactura,sin_diploma
+N007,2,0.67,1.0,0.72,88.0,0,0,0,0,adultos,Construccion,cuarto_ano
+N008,2,1.0,0.94,0.68,100.0,0,0,0,0,jovenes,Hospitalidad,cuarto_ano
