@@ -2,6 +2,7 @@
 
     python main.py evaluar                         compara modelos con validación cruzada y elige uno
     python main.py alertar datos/ejemplo_semana3.csv   genera alertas para participantes nuevos
+    python main.py auditar                         matriz de confusión, validación temporal y brechas por subgrupo
 """
 import argparse
 import sys
@@ -9,6 +10,8 @@ import sys
 import pandas as pd
 
 from src.alerta import entrenar, generar_alertas
+from src.auditoria import (exhaustividad_por_subgrupo, matriz_confusion, predicciones_fuera_de_pliegue,
+                           validacion_temporal)
 from src.config import RAIZ
 from src.datos import cargar_datos, separar_X_y, validar_datos
 from src.modelos import construir_modelos
@@ -51,14 +54,40 @@ def cmd_alertar(args):
     return 0
 
 
+def cmd_auditar(_args):
+    df = cargar_datos()
+    validar_datos(df)
+    nombre = "Regresión logística (balanced)"
+    pred = predicciones_fuera_de_pliegue(df, nombre)
+    m = matriz_confusion(df["no_completo"], pred)
+    print(f"Modelo: {nombre} · predicciones fuera de pliegue (CV estratificada, 5 pliegues)\n")
+    print("Matriz de confusión (1 = no completó):")
+    print(f"                 predijo 0   predijo 1\n  real 0 (completó)   {m['VN']:5d}       {m['FP']:5d}\n"
+          f"  real 1 (no compl.)  {m['FN']:5d}       {m['VP']:5d}")
+    print(f"  exhaustividad = {m['exhaustividad']:.3f} · precisión = {m['precision']:.3f}\n")
+    t = validacion_temporal(df, nombre)
+    print(f"Validación temporal: entrena con {t['entrenamiento']}, prueba con {t['prueba']}")
+    print(f"  exhaustividad = {t['exhaustividad']:.3f} · precisión = {t['precision']:.3f}\n")
+    tabla, global_ = exhaustividad_por_subgrupo(df, pred)
+    print(f"Exhaustividad por subgrupo (global = {global_:.3f}; brecha si > 0.05 por debajo o cociente < 0.80, "
+          "con >= 30 positivos):")
+    print(tabla.to_string(index=False))
+    (RAIZ / "resultados").mkdir(exist_ok=True)
+    tabla.to_csv(RAIZ / "resultados" / "subgrupos.csv", index=False)
+    n = int(tabla["brecha"].sum())
+    print(f"\n{n} subgrupo(s) con brecha. Ver README, sección Limitaciones.")
+    return 0
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(description="Alerta temprana de no completación (adiestramiento laboral)")
     sub = p.add_subparsers(dest="comando", required=True)
     sub.add_parser("evaluar", help="compara modelos con validación cruzada")
     a = sub.add_parser("alertar", help="genera alertas para un CSV de participantes en la semana 3")
     a.add_argument("archivo")
+    sub.add_parser("auditar", help="matriz de confusión, validación temporal y exhaustividad por subgrupo")
     args = p.parse_args(argv)
-    return {"evaluar": cmd_evaluar, "alertar": cmd_alertar}[args.comando](args)
+    return {"evaluar": cmd_evaluar, "alertar": cmd_alertar, "auditar": cmd_auditar}[args.comando](args)
 
 
 if __name__ == "__main__":
