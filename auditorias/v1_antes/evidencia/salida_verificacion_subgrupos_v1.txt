@@ -1,0 +1,29 @@
+Matriz de confusión (CV, 5 pliegues): VN=720 FP=298 FN=188 VP=314
+Exhaustividad global = 0.625 · Precisión global = 0.513
+
+Subgrupo: genero
+  F        n= 858 positivos=299 exhaustividad=0.622 (global 0.625, cociente 0.99)
+  M        n= 662 positivos=203 exhaustividad=0.631 (global 0.625, cociente 1.00)
+
+Subgrupo: grupo_edad
+  16-24    n= 646 positivos=212 exhaustividad=0.651 (global 0.625, cociente 0.90)
+  25-39    n= 330 positivos=105 exhaustividad=0.724 (global 0.625, cociente 1.00)
+  40+      n= 544 positivos=185 exhaustividad=0.541 (global 0.625, cociente 0.75)  <-- BRECHA
+
+Subgrupo: region
+  Centro   n= 171 positivos= 67 exhaustividad=0.761 (global 0.625, cociente 1.00)
+  Este     n= 178 positivos= 61 exhaustividad=0.574 (global 0.625, cociente 0.75)  <-- BRECHA
+  Metro    n= 490 positivos=145 exhaustividad=0.600 (global 0.625, cociente 0.79)  <-- BRECHA
+  Norte    n= 271 positivos=100 exhaustividad=0.570 (global 0.625, cociente 0.75)  <-- BRECHA
+  Oeste    n= 187 positivos= 66 exhaustividad=0.667 (global 0.625, cociente 0.88)
+  Sur      n= 223 positivos= 63 exhaustividad=0.635 (global 0.625, cociente 0.83)
+
+Subgrupo: cohorte
+  2022-1   n= 190 positivos= 61 exhaustividad=0.508 (global 0.625, cociente 0.71)  <-- BRECHA
+  2022-2   n= 190 positivos= 55 exhaustividad=0.691 (global 0.625, cociente 0.96)
+  2023-1   n= 190 positivos= 60 exhaustividad=0.717 (global 0.625, cociente 1.00)
+  2023-2   n= 190 positivos= 71 exhaustividad=0.535 (global 0.625, cociente 0.75)  <-- BRECHA
+  2024-1   n= 190 positivos= 56 exhaustividad=0.589 (global 0.625, cociente 0.82)
+  2024-2   n= 190 positivos= 60 exhaustividad=0.700 (global 0.625, cociente 0.98)
+  2025-1   n= 190 positivos= 67 exhaustividad=0.612 (global 0.625, cociente 0.85)
+  2025-2   n= 190 positivos= 72 exhaustividad=0.667 (global 0.625, cociente 0.93)
