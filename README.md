@@ -106,19 +106,38 @@ pip install -r requirements.txt
 
 Para regenerar los datos sintéticos (opcional; produce exactamente el mismo CSV): `python datos/generar_datos.py`.
 
+## Demostración (para que otra persona la use)
+
+**Opción 1 · Colab, sin instalar nada:** abre [este enlace](https://colab.research.google.com/github/carloaliceamedina-cell/capstone-alerta-temprana-mai540/blob/main/demo_colab.ipynb) y usa *Entorno de ejecución → Ejecutar todo*. El cuaderno descarga el repositorio y ejecuta `evaluar`, `auditar` y `degradacion`. Su última celda publica una página web con un **enlace público temporal**, donde se prueban casos moviendo controles.
+
+**Opción 2 · App local con Gradio:**
+
+```bash
+pip install -r requirements-demo.txt
+python app_gradio.py
+```
+Abre la dirección que aparece (`http://127.0.0.1:7860`). Mueve la asistencia de las semanas 1 a 3, marca barreras y pulsa **Submit**. Verás la probabilidad de no completar, la alerta y los tres factores que más suben el riesgo. Las limitaciones se muestran arriba del formulario, antes de usarla.
+
+**4. Simular la degradación** (el mismo modelo, con datos que cambiaron):
+
+```bash
+python main.py degradacion
+```
+
 ## Pruebas
 
 ```bash
 pytest -v
 ```
 
-Se espera **18 passed** (unos 5 segundos). GitHub Actions las ejecuta en cada push y en cada pull request antes de integrar (pestaña **Actions**). Qué comprueban:
+Se espera **21 passed** (unos 5 segundos). GitHub Actions las ejecuta en cada push y en cada pull request antes de integrar (pestaña **Actions**). Qué comprueban:
 
 | Archivo | Comprueba |
 |---|---|
 | `tests/test_datos.py` | que ninguna columna del futuro ni sensible sea predictor; que el generador sea reproducible y coincida con el CSV; que `validar_datos()` rechace rangos inválidos, vacíos, valores no binarios y columnas faltantes |
 | `tests/test_modelo.py` | que el modelo elegido supere **ambas** líneas base con precisión ≥ 0.50; que el resultado sea estable entre pliegues (desv. < 0.08); que las métricas estén en [0, 1]; que la preparación viva dentro del Pipeline (sin fuga) |
 | `tests/test_alerta.py` | el formato de la alerta; el rechazo de entradas inválidas; que más barreras y menos asistencia den más riesgo; que los factores mostrados realmente suban el riesgo frente al participante promedio |
+| `tests/test_despliegue.py` | que la demo devuelva una alerta legible (riesgo alto → "OFRECER APOYO", riesgo bajo → "seguimiento normal"); que la simulación de degradación muestre la caída cuando cambia el registro de asistencia |
 | `tests/test_auditoria.py` | que la matriz de confusión cuadre con las métricas; que la tabla de subgrupos marque brechas con el umbral de la Skill; que la validación temporal no use la cohorte de prueba para entrenar |
 
 ## Limitaciones
@@ -128,6 +147,15 @@ Se espera **18 passed** (unos 5 segundos). GitHub Actions las ejecuta en cada pu
 - **Detecta menos a quienes tienen 40 años o más** (0.541 contra 0.625 global). No se corrigió usando la edad como predictor, porque es una variable sensible, ni bajando el umbral, porque la precisión quedaría bajo 0.50. Mitigación: para participantes de 40 años o más, el coordinador no debe tomar "seguimiento normal" como señal de que no hay riesgo, y `python main.py auditar` muestra la brecha en cada reentrenamiento.
 - **El nombre del modelo está fijo** en `src/alerta.py` y en `python main.py auditar` ("Regresión logística (balanced)"). Hoy coincide con el que elige `evaluar`; si al reentrenar con otros datos se eligiera otro, habría que cambiarlo en esos dos lugares (comentario 4 de la revisión del PR #2).
 - **No es causal**: que un factor pese no prueba que el apoyo correspondiente funcione.
+- **Degradación medida** (`python main.py degradacion`): el modelo se entrenó con las cohortes 2022-1 a 2024-2 y se evaluó con las de 2025.
+
+  | Escenario | Exhaustividad | Precisión |
+  |---|---|---|
+  | Sin cambios | 0.640 | 0.614 |
+  | La asistencia se registra de otra forma (+0.15; por ejemplo, modalidad híbrida) | **0.403** | 0.737 |
+  | Más participantes con barrera de transporte (nuevo fondo rural) | 0.763 | 0.601 |
+
+  El cambio en el registro de asistencia hace caer la exhaustividad por debajo de la regla actual (0.514) **sin que cambie una línea de código**. El cambio de población no la baja, pero genera más alertas para la misma coordinación.
 - **Qué cambiaría con el tiempo**: cambios de fondos o de política federal (la población atendida), nuevas áreas de adiestramiento o un cambio en cómo se registra la asistencia. Se notaría en que la exhaustividad medida con cohortes ya terminadas cae por debajo de la regla de asistencia (0.514).
 - **Cuándo revisarla**: al cerrar cada cohorte (comparar alertas contra resultados reales con `python main.py auditar`) y siempre que cambie la población, el currículo o la forma de registrar asistencia.
 
@@ -138,7 +166,10 @@ Se espera **18 passed** (unos 5 segundos). GitHub Actions las ejecuta en cada pu
 ├── README.md
 ├── requirements.txt
 ├── pytest.ini
-├── main.py                       # línea de comandos: evaluar / alertar / auditar
+├── main.py                       # línea de comandos: evaluar / alertar / auditar / degradacion
+├── app_gradio.py                 # demostración web (Gradio)
+├── demo_colab.ipynb              # demostración en Colab (enlace público)
+├── requirements-demo.txt         # dependencias de la demo (Gradio)
 ├── datos/
 │   ├── generar_datos.py          # generador sintético (semilla fija)
 │   ├── participantes_sinteticos.csv
@@ -149,7 +180,8 @@ Se espera **18 passed** (unos 5 segundos). GitHub Actions las ejecuta en cada pu
 │   ├── modelos.py                # líneas base y modelos (Pipeline)
 │   ├── validacion.py             # CV y criterio de elección
 │   ├── alerta.py                 # alerta con los 3 factores principales
-│   └── auditoria.py              # matriz de confusión, validación temporal, subgrupos
+│   ├── auditoria.py              # matriz de confusión, validación temporal, subgrupos
+│   └── degradacion.py            # simulación de degradación
 ├── tests/                        # pruebas pytest
 ├── auditorias/                   # informes de la Skill antes y después de corregir
 ├── revisiones/                   # revisión de cada pull request y respuestas
