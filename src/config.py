@@ -7,6 +7,12 @@ SEMILLA = 42
 
 OBJETIVO = "no_completo"          # 1 = no completó el programa (clase positiva: la que queremos detectar)
 
+# Costo del error (hallazgo V1.4 de la auditoría): no detectar a quien va a abandonar (falso negativo)
+# cuesta más que ofrecer apoyo a quien lo habría completado igual (falso positivo). El primero pierde
+# el adiestramiento y el programa pierde un resultado de desempeño WIOA; el segundo cuesta una llamada
+# o un pase de transporte. Por eso la métrica prioritaria es la EXHAUSTIVIDAD de la clase 1, con una
+# precisión mínima de 0.50 para que el número de alertas siga siendo manejable para la coordinación.
+
 # Predictores: solo información disponible al cierre de la SEMANA 3 del programa.
 PREDICTORES_NUM = [
     "meses_desempleo",
