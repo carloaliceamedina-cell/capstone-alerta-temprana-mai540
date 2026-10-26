@@ -1,15 +1,10 @@
 """Pruebas de los datos y de las reglas de columnas (fuga y variables sensibles)."""
-import sys
-from pathlib import Path
-
 import pandas as pd
 import pytest
+from generar_datos import generar  # la ruta la prepara tests/conftest.py
 
 from src.config import COLUMNAS_FUTURO, COLUMNAS_SENSIBLES, OBJETIVO, PREDICTORES
 from src.datos import cargar_datos, separar_X_y, validar_datos
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "datos"))
-from generar_datos import generar  # noqa: E402
 
 
 def test_columnas_del_futuro_y_sensibles_no_son_predictores():
