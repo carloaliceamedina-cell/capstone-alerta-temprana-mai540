@@ -67,8 +67,8 @@ Validación cruzada estratificada de 5 pliegues (`python main.py evaluar`):
 Requisitos: Python 3.10 o más reciente y Git.
 
 ```bash
-git clone https://github.com/carloaliceamedina-cell/mai540-capstone-alerta-temprana.git
-cd mai540-capstone-alerta-temprana
+git clone https://github.com/carloaliceamedina-cell/capstone-alerta-temprana-mai540.git
+cd capstone-alerta-temprana-mai540
 python -m venv .venv
 source .venv/bin/activate        # en Windows: .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
