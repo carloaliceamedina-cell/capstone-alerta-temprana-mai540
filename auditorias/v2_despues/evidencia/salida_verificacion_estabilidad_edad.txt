@@ -1,0 +1,11 @@
+global  exhaustividad por semilla = [0.625, 0.635, 0.643, 0.633, 0.643]  media = 0.636
+16-24   exhaustividad por semilla = [0.642, 0.665, 0.665, 0.651, 0.656]  media = 0.656
+25-39   exhaustividad por semilla = [0.705, 0.714, 0.724, 0.733, 0.733]  media = 0.722
+40+     exhaustividad por semilla = [0.562, 0.557, 0.573, 0.557, 0.578]  media = 0.565
+
+Promedio de asistencia y barreras por grupo de edad (para explicar la brecha):
+            asistencia_sem1  asistencia_sem3  barrera_transporte  barrera_cuido  meses_desempleo
+grupo_edad                                                                                      
+16-24                  0.82             0.75                0.29           0.20             5.81
+25-39                  0.83             0.75                0.31           0.23             5.88
+40+                    0.84             0.77                0.28           0.24             6.08

@@ -1,0 +1,11 @@
+Datos: 1520 participantes, 8 cohortes, no completó = 33.0%
+
+Validación cruzada estratificada, 5 pliegues (media ± desviación estándar):
+                                Modelo Exhaustividad     Precisión            F1 Exact. balanceada
+        Línea base: azar estratificado 0.335 ± 0.065 0.343 ± 0.065 0.339 ± 0.065     0.509 ± 0.048
+Línea base: regla de asistencia < 75 % 0.514 ± 0.060 0.576 ± 0.040 0.543 ± 0.051     0.664 ± 0.035
+        Regresión logística (balanced) 0.625 ± 0.041 0.514 ± 0.040 0.564 ± 0.039     0.666 ± 0.033
+              Random Forest (balanced) 0.600 ± 0.044 0.517 ± 0.037 0.555 ± 0.039     0.662 ± 0.032
+
+Modelo elegido: Regresión logística (balanced)
+Criterio: mayor exhaustividad media con precisión media >= 0.50; si la diferencia es menor que una desviación, gana el más interpretable.

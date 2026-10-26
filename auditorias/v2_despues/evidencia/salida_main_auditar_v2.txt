@@ -1,0 +1,34 @@
+Modelo: Regresión logística (balanced) · predicciones fuera de pliegue (CV estratificada, 5 pliegues)
+
+Matriz de confusión (1 = no completó):
+                 predijo 0   predijo 1
+  real 0 (completó)     720         298
+  real 1 (no compl.)    188         314
+  exhaustividad = 0.625 · precisión = 0.513
+
+Validación temporal: entrena con 2022-1 a 2025-1 (1330 casos), prueba con 2025-2 (190 casos)
+  exhaustividad = 0.639 · precisión = 0.575
+
+Exhaustividad por subgrupo (global = 0.625; brecha si > 0.05 por debajo o cociente < 0.80, con >= 30 positivos):
+  variable subgrupo   n  positivos  exhaustividad  diferencia_vs_global  cociente_vs_mejor  brecha
+    genero        F 858        299          0.622                -0.003               0.99   False
+    genero        M 662        203          0.631                 0.005               1.00   False
+grupo_edad    16-24 646        212          0.651                 0.025               0.90   False
+grupo_edad    25-39 330        105          0.724                 0.098               1.00   False
+grupo_edad      40+ 544        185          0.541                -0.085               0.75    True
+    region   Centro 171         67          0.761                 0.136               1.00   False
+    region     Este 178         61          0.574                -0.052               0.75    True
+    region    Metro 490        145          0.600                -0.025               0.79    True
+    region    Norte 271        100          0.570                -0.055               0.75    True
+    region    Oeste 187         66          0.667                 0.041               0.88   False
+    region      Sur 223         63          0.635                 0.009               0.83   False
+   cohorte   2022-1 190         61          0.508                -0.117               0.71    True
+   cohorte   2022-2 190         55          0.691                 0.065               0.96   False
+   cohorte   2023-1 190         60          0.717                 0.091               1.00   False
+   cohorte   2023-2 190         71          0.535                -0.090               0.75    True
+   cohorte   2024-1 190         56          0.589                -0.036               0.82   False
+   cohorte   2024-2 190         60          0.700                 0.075               0.98   False
+   cohorte   2025-1 190         67          0.612                -0.014               0.85   False
+   cohorte   2025-2 190         72          0.667                 0.041               0.93   False
+
+6 subgrupo(s) con brecha. Ver README, sección Limitaciones.
