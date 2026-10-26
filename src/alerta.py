@@ -2,62 +2,63 @@
 import numpy as np
 import pandas as pd
 
-from src.config import PREDICTORES
+from src.config import PREDICTORES, PREDICTORES_CAT
 from src.datos import separar_X_y, validar_datos
 from src.modelos import construir_modelos
 
-NOMBRES_LEGIBLES = {
-    "meses_desempleo": "meses sin empleo antes de entrar",
-    "asistencia_sem1": "asistencia baja en la semana 1",
-    "asistencia_sem2": "asistencia baja en la semana 2",
-    "asistencia_sem3": "asistencia baja en la semana 3",
-    "puntuacion_modulo1": "puntuación baja en el módulo 1",
-    "empleado_al_ingreso": "empleo al ingresar",
-    "barrera_transporte": "barrera de transporte",
-    "barrera_cuido": "barrera de cuido",
-    "ingreso_bajo": "ingreso bajo",
+# Cada factor que ve el coordinador agrupa una o más columnas transformadas.
+# empleado_al_ingreso y meses_desempleo van juntas: están casi duplicadas (quien estaba empleado
+# tiene 0 meses sin empleo) y por separado sus coeficientes se compensan y engañan.
+FACTORES = {
+    "situación de empleo al ingresar": ["num__meses_desempleo", "bin__empleado_al_ingreso"],
+    "asistencia baja en la semana 1": ["num__asistencia_sem1"],
+    "asistencia baja en la semana 2": ["num__asistencia_sem2"],
+    "asistencia baja en la semana 3": ["num__asistencia_sem3"],
+    "puntuación baja en el módulo 1": ["num__puntuacion_modulo1"],
+    "barrera de transporte": ["bin__barrera_transporte"],
+    "barrera de cuido": ["bin__barrera_cuido"],
+    "ingreso bajo": ["bin__ingreso_bajo"],
 }
-# En estas variables el riesgo SUBE cuando el valor BAJA: se nombran como "baja"
-INVERSAS = {"asistencia_sem1", "asistencia_sem2", "asistencia_sem3", "puntuacion_modulo1"}
+ETIQUETAS_CAT = {"programa": "programa", "area_adiestramiento": "área de adiestramiento", "escolaridad": "escolaridad"}
 
 
 def entrenar(df, nombre_modelo="Regresión logística (balanced)"):
-    """Entrena el modelo final con todos los datos históricos (después de evaluarlo con CV)."""
+    """Entrena el modelo final con todos los datos históricos (después de evaluarlo con CV) y guarda
+    el participante promedio de entrenamiento, que es la referencia para explicar cada alerta."""
     validar_datos(df)
     X, y = separar_X_y(df)
-    return construir_modelos()[nombre_modelo].fit(X, y)
+    modelo = construir_modelos()[nombre_modelo].fit(X, y)
+    modelo.referencia_ = _transformar(modelo, X).mean(axis=0)
+    return modelo
 
 
-def _nombre_factor(col_transformada):
-    grupo, col = col_transformada.split("__", 1)
-    if grupo == "cat":
-        base, valor = col.rsplit("_", 1) if col.count("_") else (col, "")
-        for c in ("area_adiestramiento", "escolaridad", "programa"):
-            if col.startswith(c + "_"):
-                return f"{c.replace('_', ' ')}: {col[len(c) + 1:].replace('_', ' ')}"
-        return col
-    return NOMBRES_LEGIBLES.get(col, col)
+def _transformar(modelo, X):
+    Z = modelo.named_steps["prep"].transform(X)
+    return Z.toarray() if hasattr(Z, "toarray") else np.asarray(Z)
 
 
 def factores(modelo, X, n=3):
-    """Para un Pipeline de regresión logística: contribución de cada variable al logit
-    (coeficiente x valor estandarizado). Devuelve, por fila, los n factores que más SUBEN el riesgo."""
-    prep, clf = modelo.named_steps["prep"], modelo.named_steps["modelo"]
-    Z = prep.transform(X)
-    Z = Z.toarray() if hasattr(Z, "toarray") else np.asarray(Z)
-    contrib = Z * clf.coef_[0]
-    nombres = prep.get_feature_names_out()
+    """Contribución de cada factor al logit FRENTE AL PARTICIPANTE PROMEDIO de entrenamiento:
+    coeficiente x (valor transformado - promedio). Devuelve, por fila, los n factores que más SUBEN
+    el riesgo (solo contribuciones positivas)."""
+    nombres = list(modelo.named_steps["prep"].get_feature_names_out())
+    contrib = (_transformar(modelo, X) - modelo.referencia_) * modelo.named_steps["modelo"].coef_[0]
+    grupos = {f: [nombres.index(c) for c in cols] for f, cols in FACTORES.items()}
+    for cat in PREDICTORES_CAT:
+        grupos[cat] = [j for j, c in enumerate(nombres) if c.startswith(f"cat__{cat}_")]
     salida = []
-    for fila in contrib:
-        orden = np.argsort(fila)[::-1]
-        salida.append([_nombre_factor(nombres[j]) for j in orden[:n] if fila[j] > 0])
+    for i, fila in enumerate(contrib):
+        totales = {f: fila[idx].sum() for f, idx in grupos.items()}
+        orden = sorted((f for f in totales if totales[f] > 0), key=totales.get, reverse=True)[:n]
+        salida.append([f"{ETIQUETAS_CAT[f]}: {str(X.iloc[i][f]).replace('_', ' ')}" if f in ETIQUETAS_CAT else f
+                       for f in orden])
     return salida
 
 
 def generar_alertas(modelo, nuevos, umbral=0.5):
     """Recibe participantes en la semana 3 y devuelve probabilidad, alerta y factores principales."""
     validar_datos(nuevos, con_objetivo=False)
-    X = nuevos[PREDICTORES]
+    X = nuevos[PREDICTORES].reset_index(drop=True)
     prob = modelo.predict_proba(X)[:, 1]
     resultado = pd.DataFrame({
         "id_participante": nuevos.get("id_participante", pd.Series(range(len(nuevos)))).to_numpy(),
