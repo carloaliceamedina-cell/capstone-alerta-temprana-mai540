@@ -159,7 +159,11 @@ Se espera **18 passed** (unos 5 segundos). GitHub Actions las ejecuta en cada pu
 
 ## Cómo se trabajó
 
-El desarrollo se organizó en ramas por funcionalidad (`funcionalidad/pruebas`, `correccion/auditoria-subgrupos`, `funcionalidad/readme`), cada una con un pull request revisado antes de integrar a `main` (pestaña **Pull requests**). La revisión la hizo la Skill `auditoria-modelos` con comentarios por archivo y línea, y cada comentario tiene su respuesta (`revisiones/`). GitHub Actions ejecuta las pruebas en cada push y en cada pull request, y además sigue este README paso a paso en una máquina limpia (job `instalacion-segun-readme`).
+El desarrollo se organizó en tres ramas por funcionalidad: `funcionalidad/pruebas`, `correccion/auditoria-subgrupos` y `funcionalidad/readme`. Cada una se revisó antes de integrarla a `main`, y cada integración es un *merge commit* que nombra su revisión.
+
+- La revisión la hizo la Skill `auditoria-modelos`, con comentarios por archivo y línea, cambios pedidos, respuestas y decisión: `revisiones/PR*_revision_skill.md`. Los commits de corrección citan el número del comentario que atienden (por ejemplo, `fix(revision PR #1, hallazgos 1 y 5)`).
+- La descripción de cada rama, con la plantilla de pull request del curso, está en `revisiones/PR*_descripcion_plantilla.md`.
+- GitHub Actions ejecutó las pruebas en cada rama **antes** de integrarla (pestaña **Actions**: runs #1 a #3 en verde) y sigue este README paso a paso en una máquina limpia (job `instalacion-segun-readme`).
 
 **Prueba con una persona que no conoce el proyecto:** *(pendiente: completar después de que alguien siga solo este README, anotando qué le costó)*.
 
