@@ -42,3 +42,13 @@ def test_mas_riesgo_con_barreras_y_menos_asistencia():
     base["id_participante"] = ["riesgo", "sin_riesgo"]
     res = generar_alertas(modelo(), base).set_index("id_participante")
     assert res.loc["riesgo", "prob_no_completar"] > res.loc["sin_riesgo", "prob_no_completar"]
+
+
+def test_factores_suben_el_riesgo_frente_al_promedio():
+    """Revisión del PR #1: un factor solo se muestra si SUBE el riesgo frente al participante promedio.
+    Quien estaba empleado al ingresar (0 meses sin empleo) no debe recibir 'situación de empleo' como factor."""
+    caso = ejemplo().iloc[[0]].reset_index(drop=True)
+    caso.loc[0, ["empleado_al_ingreso", "meses_desempleo"]] = [1, 0]
+    res = generar_alertas(modelo(), caso)
+    assert "situación de empleo" not in res.loc[0, "factores_principales"]
+    assert "empleo al ingresar" not in res.loc[0, "factores_principales"]
