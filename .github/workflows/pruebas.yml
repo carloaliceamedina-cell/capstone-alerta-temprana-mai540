@@ -36,3 +36,18 @@ jobs:
           python main.py alertar datos/ejemplo_semana3.csv
           python main.py auditar
           pytest -v
+
+  demo-gradio:
+    # Comprueba que la interfaz de la demostración se construye con Gradio instalado
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-demo.txt
+      - name: Construir la interfaz y evaluar un caso
+        run: |
+          python -c "from app_gradio import construir_demo, evaluar; d = construir_demo(); print(type(d).__name__); print(evaluar(60,55,50,58,10,False,True,True,True,'adultos','Manufactura','sin_diploma'))"
+      - name: Simulación de degradación
+        run: python main.py degradacion

@@ -3,6 +3,7 @@
     python main.py evaluar                         compara modelos con validación cruzada y elige uno
     python main.py alertar datos/ejemplo_semana3.csv   genera alertas para participantes nuevos
     python main.py auditar                         matriz de confusión, validación temporal y brechas por subgrupo
+    python main.py degradacion                     cómo cae el modelo si cambian los datos (sin tocar el código)
 """
 import argparse
 import sys
@@ -13,6 +14,7 @@ from src.alerta import entrenar, generar_alertas
 from src.auditoria import (exhaustividad_por_subgrupo, matriz_confusion, predicciones_fuera_de_pliegue,
                            validacion_temporal)
 from src.config import RAIZ
+from src.degradacion import simular
 from src.datos import cargar_datos, separar_X_y, validar_datos
 from src.modelos import construir_modelos
 from src.validacion import elegir_modelo, evaluar_cv
@@ -79,6 +81,18 @@ def cmd_auditar(_args):
     return 0
 
 
+def cmd_degradacion(_args):
+    df = cargar_datos()
+    validar_datos(df)
+    tabla = simular(df)
+    print("Modelo entrenado con las cohortes 2022-1 a 2024-2 y evaluado con las cohortes 2025.")
+    print("El código y el modelo son idénticos en los tres escenarios; solo cambian los datos.\n")
+    print(tabla.to_string(index=False))
+    print("\nLínea base de referencia (regla de asistencia < 75 %): exhaustividad 0.514 en CV.")
+    print("Si la exhaustividad medida al cerrar una cohorte cae por debajo de esa línea base, hay que revisar y reentrenar.")
+    return 0
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(description="Alerta temprana de no completación (adiestramiento laboral)")
     sub = p.add_subparsers(dest="comando", required=True)
@@ -86,8 +100,10 @@ def main(argv=None):
     a = sub.add_parser("alertar", help="genera alertas para un CSV de participantes en la semana 3")
     a.add_argument("archivo")
     sub.add_parser("auditar", help="matriz de confusión, validación temporal y exhaustividad por subgrupo")
+    sub.add_parser("degradacion", help="simula cambios en los datos y mide cuánto cae el modelo")
     args = p.parse_args(argv)
-    return {"evaluar": cmd_evaluar, "alertar": cmd_alertar, "auditar": cmd_auditar}[args.comando](args)
+    comandos = {"evaluar": cmd_evaluar, "alertar": cmd_alertar, "auditar": cmd_auditar, "degradacion": cmd_degradacion}
+    return comandos[args.comando](args)
 
 
 if __name__ == "__main__":
