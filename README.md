@@ -152,6 +152,7 @@ Se espera **18 passed** (unos 5 segundos). GitHub Actions las ejecuta en cada pu
 │   └── auditoria.py              # matriz de confusión, validación temporal, subgrupos
 ├── tests/                        # pruebas pytest
 ├── auditorias/                   # informes de la Skill antes y después de corregir
+├── revisiones/                   # revisión de cada pull request y respuestas
 ├── .claude/skills/auditoria-modelos/   # Skill de auditoría (Tarea 4.1)
 └── .github/workflows/pruebas.yml # pytest en cada push y pull request
 ```
