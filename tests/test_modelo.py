@@ -24,7 +24,10 @@ def test_modelo_elegido_supera_las_dos_lineas_base():
 
 
 def test_resultado_estable_entre_pliegues():
-    """La desviación de la exhaustividad entre pliegues es pequeña (resultado estable)."""
+    """La desviación de la exhaustividad entre pliegues es pequeña (resultado estable).
+    Por qué 0.08 (revisión del PR #1, pregunta 3): la desviación observada es 0.041. El límite es
+    aproximadamente el doble, y queda por debajo de la ventaja sobre la regla de asistencia (0.111).
+    Si la desviación lo superara, esa ventaja ya no se distinguiría del ruido entre pliegues."""
     t = tabla()
     elegido = elegir_modelo(t.reset_index())
     assert t.loc[elegido, "exhaustividad_desv"] < 0.08
